@@ -8,3 +8,5 @@ def capture():
 
     sleep(2)
     camera.capture('foo.jpg')
+    
+capture()
