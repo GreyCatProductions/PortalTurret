@@ -1,9 +1,9 @@
 from time import sleep
-from picamera import PiCamera
+from picamera2 import Picamera2
 
 def capture():
-    camera = PiCamera()
-    camera.resolution = (1024, 768)
+    camera = Picamera2()
+    camera.resolution = (640, 480)
     camera.start_preview()
 
     sleep(2)
