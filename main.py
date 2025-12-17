@@ -3,7 +3,7 @@ import cv2
 cascade_path = "haarcascade_frontalface_default.xml"
 classifier = cv2.CascadeClassifier(cascade_path)
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0, format="NV12")
 if not cap.isOpened():
     raise RuntimeError("Could not open camera. Try changing index 0->1->2 or check permissions.")
 
