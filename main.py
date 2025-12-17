@@ -3,10 +3,14 @@ import cv2
 cascade_path = "haarcascade_frontalface_default.xml"
 classifier = cv2.CascadeClassifier(cascade_path)
 
-# Open webcam (0 = default camera)
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     raise RuntimeError("Could not open camera. Try changing index 0->1->2 or check permissions.")
+
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+cap.set(cv2.CAP_PROP_FPS, 5)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 while True:
     ret, frame = cap.read()
