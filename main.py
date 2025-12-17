@@ -1,38 +1,40 @@
-from picamera2 import Picamera2
 import cv2
-import time
 
-face_cascade = cv2.CascadeClassifier(
-    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-)
+cascade_path = "haarcascade_frontalface_default.xml"
+classifier = cv2.CascadeClassifier(cascade_path)
 
-picam2 = Picamera2()
-
-config = picam2.create_preview_configuration(main={"size": (640, 480), "format": "RGB888"})
-picam2.configure(config)
-picam2.start()
-
-time.sleep(0.5)
+# Open webcam (0 = default camera)
+cap = cv2.VideoCapture(0)
+if not cap.isOpened():
+    raise RuntimeError("Could not open camera. Try changing index 0->1->2 or check permissions.")
 
 while True:
-    frame = picam2.capture_array()  
-    gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+    ret, frame = cap.read()
+    if not ret:
+        break
 
-    faces = face_cascade.detectMultiScale(
+    # Convert to grayscale for the detector
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Detect faces
+    bboxes = classifier.detectMultiScale(
         gray,
-        scaleFactor=1.2,
+        scaleFactor=1.1,
         minNeighbors=5,
         minSize=(40, 40)
     )
 
-    frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame_bgr, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    # Draw rectangles
+    for (x, y, w, h) in bboxes:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-    cv2.imshow("Face detection", frame_bgr)
+    # Show live view
+    cv2.imshow("Face detection", frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    # Quit on 'q' or ESC
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q') or key == 27:
         break
 
-picam2.stop()
+cap.release()
 cv2.destroyAllWindows()
