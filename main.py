@@ -1,7 +1,7 @@
 import cv2
 from picamera2 import Picamera2
 
-cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+cascade_path = "haarcascade_frontalface_default.xml"
 classifier = cv2.CascadeClassifier(cascade_path)
 
 if classifier.empty():
