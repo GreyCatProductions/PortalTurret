@@ -1,17 +1,17 @@
 import cv2
-import numpy as np
+from picamera2 import Picamera2
 
-cap = cv2.VideoCapture(0) 
-print("opened:", cap.isOpened())
+picam2 = Picamera2()
+picam2.configure(picam2.create_preview_configuration(main={"size": (320, 240), "format": "RGB888"}))
+picam2.start()
 
-for i in range(30):  
-    ret, frame = cap.read()
-    print(i, "ret:", ret, "type:", type(frame), "shape:", None if frame is None else frame.shape,
-          "mean:", None if frame is None else frame.mean())
+while True:
+    frame = picam2.capture_array()          # RGB
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-    if ret and frame is not None:
-        cv2.imshow("test", frame)
-        cv2.waitKey(1)
+    cv2.imshow("cam", frame)
+    if (cv2.waitKey(1) & 0xFF) in (27, ord('q')):
+        break
 
-cap.release()
 cv2.destroyAllWindows()
+picam2.stop()
