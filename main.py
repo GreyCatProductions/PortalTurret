@@ -18,8 +18,8 @@ picam2.start()
 frame_id = 0
 last_bboxes = []
 
-DETECT_EVERY = 4         
-DOWNSCALE = 0.5        
+DETECT_EVERY = 3         
+DOWNSCALE = 1.0       
 
 try:
     while True:
@@ -38,14 +38,15 @@ try:
                     minNeighbors=5,
                     minSize=(30, 30),
                 )
+                print("faces:", len(b))
 
                 last_bboxes = [(int(x / DOWNSCALE), int(y / DOWNSCALE),
                                 int(w / DOWNSCALE), int(h / DOWNSCALE)) for (x, y, w, h) in b]
             else:
                 last_bboxes = classifier.detectMultiScale(
                     gray,
-                    scaleFactor=1.2,
-                    minNeighbors=5,
+                    scaleFactor=1.1,
+                    minNeighbors=3,
                     minSize=(50, 50),
                 )
 
