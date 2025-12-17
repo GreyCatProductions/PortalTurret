@@ -7,9 +7,9 @@ from ULN2003Stepper import ULN2003Stepper
 def main():
     pan = ULN2003Stepper([17,18,27,22])
     detector = PiCamFaceDetector(
-        cascade_path="haarcascade_frontalface_default.xml",
+        cascadePath="haarcascade_frontalface_default.xml",
         size=(320, 240),
-        detect_every=3,
+        detectEvery=3,
         scaleFactor=1.1,
         minNeighbors=3,
         minSize=(30, 30),
