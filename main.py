@@ -19,7 +19,7 @@ def main():
     
     try:
         while True:
-            if not updateLoop(detector, pan):
+            if not updateLoop(pan, detector):
                 break
     finally:
         cv2.destroyAllWindows()
