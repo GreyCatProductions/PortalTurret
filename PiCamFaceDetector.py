@@ -3,7 +3,7 @@ from picamera2 import Picamera2
 
 class PiCamFaceDetector:
     def __init__(self, cascadePath="haarcascade_frontalface_default.xml", size=(320, 240), detectEvery=3, scaleFactor=1.1, minNeighbors=3, minSize=(30,30)):
-        self.detect_every = int(detectEvery)
+        self.detect_every = int(max(detectEvery, 1))
         self.scaleFactor = float(scaleFactor)
         self.minNeighbors = int(minNeighbors)
         self.minSize = tuple(minSize)
@@ -11,9 +11,9 @@ class PiCamFaceDetector:
         if self.classifier.empty():
             raise RuntimeError("Cascade not loaded. Path: " + cascadePath)
 
-        picam2 = Picamera2()
-        picam2.configure(
-            picam2.create_preview_configuration(
+        self.cam = Picamera2()
+        self.cam.configure(
+            self.cam.create_preview_configuration(
                 main={"size": size, "format": "RGB888"}
                 )
         )
@@ -22,13 +22,13 @@ class PiCamFaceDetector:
         self.lastBoxes = []
         
     def start(self):
-        self.picam2.start()
+        self.cam.start()
 
     def stop(self):
-        self.picam2.stop()
+        self.cam.stop()
         
     def read(self):
-        rgb = self.picam2.capture_array()
+        rgb = self.cam.capture_array()
         return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     
     def detect(self, frame_bgr):
