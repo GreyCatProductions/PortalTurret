@@ -2,11 +2,6 @@ import RPi.GPIO as GPIO
 import time
 
 GPIO.setmode(GPIO.BCM)
-PINS = [17, 18, 27, 22] 
-
-for p in PINS:
-    GPIO.setup(p, GPIO.OUT)
-    GPIO.output(p, 0)
 
 SEQ = [
     [1, 0, 0, 0],
@@ -19,21 +14,28 @@ SEQ = [
     [1, 0, 0, 1],
 ]
 
-def step(steps, delay=0.002, direction=1):
-    seq_range = range(len(SEQ)) if direction == 1 else range(len(SEQ)-1, -1, -1)
+class ULN2003Stepper:
+    def __init__(self, pins):
+        self.pins = pins
+        
+        for p in pins:
+            GPIO.setup(p, GPIO.OUT)
+            GPIO.output(p, 0)
+            
+        self.idx = 0
+        
+    def _apply(self):
+        for pin, val in zip(self.pins, SEQ[self.idx]):
+            GPIO.output(pin, val)
 
-    for _ in range(steps):
-        for i in seq_range:
-            for pin, val in zip(PINS, SEQ[i]):
-                GPIO.output(pin, val)
+
+    def step(self, steps, direction=1, delay=0.002):
+        for _ in range(steps):
+            self.idx = (self.idx + direction) % len(SEQ)
+            self._apply()
             time.sleep(delay)
+            
+    def release(self):
+        for p in self.pins:
+            GPIO.output(p, 0)
 
-try:
-    step(steps=512, delay=0.002, direction=1)
-    time.sleep(0.5)
-    step(steps=512, delay=0.002, direction=-1)
-
-finally:
-    for p in PINS:
-        GPIO.output(p, 0)
-    GPIO.cleanup()
