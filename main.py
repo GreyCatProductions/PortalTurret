@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO
 import cv2
 from PiCamFaceDetector import PiCamFaceDetector
-from TargetFinder import TargetFinder
 from ULN2003Stepper import ULN2003Stepper
 
 
@@ -15,7 +14,6 @@ def main():
         minNeighbors=3,
         minSize=(30, 30),
     )
-    targetFinder = TargetFinder()
 
     detector.start()
     
