@@ -51,7 +51,7 @@ def updateLoop(pan, detector):
         if abs(err_x) > DEADBAND:
             steps = int(min(MAX_STEPS_PER_FRAME, max(1, abs(err_x) * GAIN)))
             direction = 1 if err_x > 0 else -1
-            pan.step(direction=direction, n=steps, delay=STEP_DELAY)
+            pan.step(direction=direction, steps=steps, delay=STEP_DELAY)
 
     cv2.imshow("Face detection (PiCam)", frame)
     
