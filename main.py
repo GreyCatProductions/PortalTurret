@@ -1,7 +1,11 @@
 import cv2
 from picamera2 import Picamera2
 
-classifier = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+classifier = cv2.CascadeClassifier(cascade_path)
+
+if classifier.empty():
+    raise RuntimeError("Cascade not loaded. Path: " + cascade_path)
 
 picam2 = Picamera2()
 picam2.configure(
