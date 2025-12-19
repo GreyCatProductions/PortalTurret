@@ -59,7 +59,7 @@ def main():
             boxes = detector.detect(frame)
 
             if(mode_ref["mode"] == "auto" and len(boxes) > 0):
-                trackFace(frame = frame, boxes=boxes, cmd_q=cmd_q)
+                trackFace(frame = frame, detector=detector ,boxes=boxes, cmd_q=cmd_q)
 
             if showCam:
                 cv2.imshow("Face detection (PiCam)", frame)
