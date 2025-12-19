@@ -1,7 +1,7 @@
 import threading
 import queue
 import time
-import InputWorker
+from InputWorker import InputWorker
 from MotorWorker import StepperWorker, push_latest
 import cv2
 from PiCamFaceDetector import PiCamFaceDetector

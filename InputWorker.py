@@ -1,4 +1,3 @@
-# ---------- Input worker (terminal commands) ----------
 import queue
 import threading
 
