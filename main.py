@@ -19,10 +19,10 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
     err_x = cx_face - cx_img
     err_y = cy_face - cy_img
 
-    cv2.circle(frame, (cx_face, y + bh // 2), 4, (0, 255, 0), -1)
-    cv2.circle(frame, (cx_img, h // 2), 4, (0, 0, 255), -1)
+    cv2.circle(frame, (cx_face, y + cy_face), 4, (0, 255, 0), -1)
+    cv2.circle(frame, (cx_img, cy_img), 4, (0, 0, 255), -1)
 
-    DEADBAND = 15
+    DEADBAND = 30
 
     xNeedsCorrection = abs(err_x) > DEADBAND
     yNeedsCorrection = abs(err_y) > DEADBAND
@@ -31,13 +31,13 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
         direction = 1 if err_x > 0 else -1
         push_latest(pan_cmd_q, ("run", direction))
     else:
-        push_latest(pan_cmd_q, ("stop"))
+        push_latest(pan_cmd_q, ("stop",))
 
     if yNeedsCorrection:
         direction = 1 if err_y > 0 else -1
         push_latest(tilt_cmd_q, ("run", direction))
     else:
-        push_latest(tilt_cmd_q, ("stop"))
+        push_latest(tilt_cmd_q, ("stop",))
 
 
 
