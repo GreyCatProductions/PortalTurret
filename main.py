@@ -63,7 +63,7 @@ def main():
     tilt_thread.start()
 
     mode_ref = {"mode": "auto"}
-    input_thread = InputWorker(pan_cmd_q, tilt_cmd_q, stop_evt, mode_ref)
+    input_thread = InputWorker(tilt_cmd_q,pan_cmd_q, stop_evt, mode_ref)
     input_thread.start()
 
     detector.start()

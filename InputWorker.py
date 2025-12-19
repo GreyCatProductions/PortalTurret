@@ -8,7 +8,7 @@ class InputWorker(threading.Thread):
     def __init__(self, tilt_cmd_q: queue.Queue, pan_cmd_q: queue.Queue, stop_evt: threading.Event, mode_ref: dict):
         super().__init__(daemon=True)
         self.tilt_cmd_q = tilt_cmd_q
-        self_pan_cmd_q = pan_cmd_q
+        self.pan_cmd_q = pan_cmd_q
         self.stop_evt = stop_evt
         self.mode_ref = mode_ref 
 
