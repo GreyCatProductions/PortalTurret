@@ -31,6 +31,7 @@ def trackFace(frame, detector, boxes, cmd_q):
 def main():
     showCam = False
     pan = ULN2003Stepper([17, 18, 27, 22])
+    tilt = ULN2003Stepper([23, 24, 10, 9])
     detector = PiCamFaceDetector(
         cascadePath="haarcascade_frontalface_default.xml",
         size=(320, 240),
@@ -42,8 +43,11 @@ def main():
 
     stop_evt = threading.Event()
     cmd_q = queue.Queue(maxsize=1)  
-    motor_thread = StepperWorker(pan, cmd_q, stop_evt)
-    motor_thread.start()
+    pan_thread = StepperWorker(pan, cmd_q, stop_evt, "pan")
+    pan_thread.start()
+    tilt_thread = StepperWorker(tilt, cmd_q, stop_evt, "tilt")
+    tilt_thread.start()
+
 
     mode_ref = {"mode": "auto"}
     input_thread = InputWorker(cmd_q, stop_evt, mode_ref)
@@ -72,8 +76,9 @@ def main():
         detector.stop()
         pan.release()
         #cv2.destroyAllWindows()
-        # optional: wait a moment for motor thread to exit
-        motor_thread.join(timeout=1.0)
+
+        pan_thread.join(timeout=1.0)
+        tilt_thread.join(timeout=1.0)
 
 if __name__ == "__main__":
     main()

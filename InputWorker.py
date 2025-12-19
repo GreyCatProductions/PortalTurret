@@ -54,9 +54,13 @@ class InputWorker(threading.Thread):
             cmd = parts[0].lower()
 
             if cmd in ("l", "left"):
-                push_latest(self.cmd_q, ("run", -1))
+                push_latest(self.cmd_q, ("pan_run", -1))
             elif cmd in ("r", "right"):
-                push_latest(self.cmd_q, ("run", 1))
+                push_latest(self.cmd_q, ("pan_run", 1))
+            elif cmd in ("u", "up"):
+                push_latest(self.cmd_q, ("tilt_run", 1))
+            elif cmd in ("d", "down"):
+                push_latest(self.cmd_q, ("tilt_run", -1))
             elif cmd in ("stop"):
                 push_latest(self.cmd_q, ("stop"))
             else:
