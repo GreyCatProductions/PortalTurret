@@ -26,10 +26,9 @@ class StepperWorker(threading.Thread):
                     continue
 
                 if cmd[0] == "run":
-                    _, direction, delay = cmd
+                    _, direction = cmd
                     self.running = True
                     self.direction = 1 if direction >= 0 else -1
-                    self.delay = float(delay)
 
                 elif cmd[0] == "stop":
                     self.running = False
