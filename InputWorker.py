@@ -48,19 +48,10 @@ class InputWorker(threading.Thread):
             parts = s.split()
             cmd = parts[0]
 
-            steps = 10
-
-            if len(parts) >= 2:
-                try:
-                    steps = int(parts[1])
-                except ValueError:
-                    print("Steps must be an integer, e.g. 'left 20'")
-                    continue
-
             if cmd in ("l", "left"):
-                push_latest(self.cmd_q, ("run", -1, max(1, steps)))
+                push_latest(self.cmd_q, ("run", -1))
             elif cmd in ("r", "right"):
-                push_latest(self.cmd_q, ("run", 1, max(1, steps)))
+                push_latest(self.cmd_q, ("run", 1))
             elif cmd == "stop":
                 push_latest(self.cmd_q, ("stop"))
             else:
