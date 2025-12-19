@@ -88,6 +88,7 @@ def main():
         stop_evt.set()
         detector.stop()
         pan.release()
+        tilt.release()
         #cv2.destroyAllWindows()
 
         pan_thread.join(timeout=1.0)
