@@ -6,7 +6,7 @@ from ULN2003Stepper import ULN2003Stepper
 
 
 class StepperWorker(threading.Thread):
-    def __init__(self, stepper: ULN2003Stepper, cmd_q: queue.Queue, stop_evt: threading.Event):
+    def __init__(self, stepper: ULN2003Stepper, cmd_q: queue.Queue, stop_evt: threading.Event, delay=0.0015):
         super().__init__(daemon=True)
         self.stepper = stepper
         self.cmd_q = cmd_q
@@ -14,7 +14,7 @@ class StepperWorker(threading.Thread):
 
         self.running = False
         self.direction = 1
-        self.delay = 0.0015
+        self.delay = delay
 
     def run(self):
         while not self.stop_evt.is_set():

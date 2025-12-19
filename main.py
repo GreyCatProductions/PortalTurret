@@ -59,7 +59,7 @@ def main():
     tilt_cmd_q = queue.Queue(maxsize=1) 
     pan_thread = StepperWorker(pan, pan_cmd_q, stop_evt)
     pan_thread.start()
-    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt)
+    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, delay=0.01)
     tilt_thread.start()
 
     mode_ref = {"mode": "auto"}
