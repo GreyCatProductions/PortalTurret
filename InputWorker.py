@@ -5,9 +5,10 @@ from MotorWorker import push_latest
 
 
 class InputWorker(threading.Thread):
-    def __init__(self, cmd_q: queue.Queue, stop_evt: threading.Event, mode_ref: dict):
+    def __init__(self, tilt_cmd_q: queue.Queue, pan_cmd_q: queue.Queue, stop_evt: threading.Event, mode_ref: dict):
         super().__init__(daemon=True)
-        self.cmd_q = cmd_q
+        self.tilt_cmd_q = tilt_cmd_q
+        self_pan_cmd_q = pan_cmd_q
         self.stop_evt = stop_evt
         self.mode_ref = mode_ref 
 
@@ -41,7 +42,8 @@ class InputWorker(threading.Thread):
 
             if s in ("manual",):
                 self.mode_ref["mode"] = "manual"
-                push_latest(self.cmd_q, ("stop"))
+                push_latest(self.pan_cmd_q, ("stop"))
+                push_latest(self.tilt_cmd_q, ("stop"))
                 print("Mode = manual (keyboard)")
                 continue
 
@@ -53,16 +55,19 @@ class InputWorker(threading.Thread):
             parts = s.split()
             cmd = parts[0].lower()
 
+            RUN = "run"
+
             if cmd in ("l", "left"):
-                push_latest(self.cmd_q, ("pan_run", -1))
+                push_latest(self.pan_cmd_q, (RUN, -1))
             elif cmd in ("r", "right"):
-                push_latest(self.cmd_q, ("pan_run", 1))
+                push_latest(self.pan_cmd_q, (RUN, 1))
             elif cmd in ("u", "up"):
-                push_latest(self.cmd_q, ("tilt_run", 1))
+                push_latest(self.tilt_cmd_q, (RUN, 1))
             elif cmd in ("d", "down"):
-                push_latest(self.cmd_q, ("tilt_run", -1))
+                push_latest(self.tilt_cmd_q, (RUN, -1))
             elif cmd in ("stop"):
-                push_latest(self.cmd_q, ("stop"))
+                push_latest(self.pan_cmd_q, ("stop"))
+                push_latest(self.tilt_cmd_q, ("stop"))
             else:
                 print("Unknown command. Type 'help'.")
 

@@ -7,25 +7,38 @@ import cv2
 from PiCamFaceDetector import PiCamFaceDetector
 from ULN2003Stepper import ULN2003Stepper
 
-def trackFace(frame, detector, boxes, cmd_q):
+def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
     h, w = frame.shape[:2]
     cx_img = w // 2
+    cy_img = h // 2
     detector.draw_boxes(frame, boxes)
 
     x, y, bw, bh = max(boxes, key=lambda b: b[2] * b[3])
     cx_face = x + bw // 2
+    cy_face = y + bh // 2
     err_x = cx_face - cx_img
+    err_y = cy_face - cy_img
 
     cv2.circle(frame, (cx_face, y + bh // 2), 4, (0, 255, 0), -1)
     cv2.circle(frame, (cx_img, h // 2), 4, (0, 0, 255), -1)
 
     DEADBAND = 15
 
-    if abs(err_x) > DEADBAND:
+    xNeedsCorrection = abs(err_x) > DEADBAND
+    yNeedsCorrection = abs(err_y) > DEADBAND
+
+    if xNeedsCorrection:
         direction = 1 if err_x > 0 else -1
-        push_latest(cmd_q, ("run", direction))
+        push_latest(pan_cmd_q, ("run", direction))
     else:
-        push_latest(cmd_q, ("stop",))
+        push_latest(pan_cmd_q, ("stop"))
+
+    if yNeedsCorrection:
+        direction = 1 if err_y > 0 else -1
+        push_latest(tilt_cmd_q, ("run", direction))
+    else:
+        push_latest(tilt_cmd_q, ("stop"))
+
 
 
 def main():
@@ -42,15 +55,15 @@ def main():
     )
 
     stop_evt = threading.Event()
-    cmd_q = queue.Queue(maxsize=1)  
-    pan_thread = StepperWorker(pan, cmd_q, stop_evt, "pan")
+    pan_cmd_q = queue.Queue(maxsize=1)  
+    tilt_cmd_q = queue.Queue(maxsize=1) 
+    pan_thread = StepperWorker(pan, pan_cmd_q, stop_evt)
     pan_thread.start()
-    tilt_thread = StepperWorker(tilt, cmd_q, stop_evt, "tilt")
+    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt)
     tilt_thread.start()
 
-
     mode_ref = {"mode": "auto"}
-    input_thread = InputWorker(cmd_q, stop_evt, mode_ref)
+    input_thread = InputWorker(pan_cmd_q, tilt_cmd_q, stop_evt, mode_ref)
     input_thread.start()
 
     detector.start()
@@ -61,7 +74,7 @@ def main():
             boxes = detector.detect(frame)
 
             if(mode_ref["mode"] == "auto" and len(boxes) > 0):
-                trackFace(frame = frame, detector=detector ,boxes=boxes, cmd_q=cmd_q)
+                trackFace(frame = frame, detector=detector ,boxes=boxes, pan_cmd_q=pan_cmd_q, tilt_cmd_q=tilt_cmd_q)
 
             if showCam:
                 cv2.imshow("Face detection (PiCam)", frame)
