@@ -1,3 +1,4 @@
+import math
 import queue
 import threading
 import time
@@ -6,7 +7,7 @@ from ULN2003Stepper import ULN2003Stepper
 
 
 class StepperWorker(threading.Thread):
-    def __init__(self, stepper: ULN2003Stepper, cmd_q: queue.Queue, stop_evt: threading.Event, delay=0.0015):
+    def __init__(self, stepper: ULN2003Stepper, cmd_q: queue.Queue, stop_evt: threading.Event, min = -math.inf, max = math.inf, delay = 0.0015):
         super().__init__(daemon=True)
         self.stepper = stepper
         self.cmd_q = cmd_q
@@ -15,6 +16,10 @@ class StepperWorker(threading.Thread):
         self.running = False
         self.direction = 1
         self.delay = delay
+        self.min = min
+        self.max = max
+
+        self.cur_step = 0
 
     def run(self):
         while not self.stop_evt.is_set():
@@ -35,8 +40,11 @@ class StepperWorker(threading.Thread):
             except queue.Empty:
                 pass
 
-            if self.running:
+            out_of_bounds = self.cur_step <= self.min or self.cur_step >= self.max
+
+            if self.running and not out_of_bounds:
                 self.stepper.step(direction=self.direction, steps=1, delay=self.delay)
+                cur_step += direction
             else:
                 time.sleep(0.01)  
 

@@ -34,7 +34,7 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
         push_latest(pan_cmd_q, ("stop",))
 
     if yNeedsCorrection:
-        direction = 1 if err_y > 0 else -1
+        direction = -1 if err_y > 0 else 1
         push_latest(tilt_cmd_q, ("run", direction))
     else:
         push_latest(tilt_cmd_q, ("stop",))
@@ -57,9 +57,9 @@ def main():
     stop_evt = threading.Event()
     pan_cmd_q = queue.Queue(maxsize=1)  
     tilt_cmd_q = queue.Queue(maxsize=1) 
-    pan_thread = StepperWorker(pan, pan_cmd_q, stop_evt)
+    pan_thread = StepperWorker(pan, pan_cmd_q, stop_evt, min=-300, max=300)
     pan_thread.start()
-    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, delay=0.01)
+    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, delay=0.01, min=300, max=300)
     tilt_thread.start()
 
     mode_ref = {"mode": "auto"}
