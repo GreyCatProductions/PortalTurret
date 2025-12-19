@@ -40,9 +40,12 @@ class StepperWorker(threading.Thread):
             except queue.Empty:
                 pass
 
-            out_of_bounds = self.cur_step <= self.min or self.cur_step >= self.max
+            hit_min = self.cur_step <= self.min and self.direction < 0
+            hit_max = self.cur_step >= self.max and self.direction > 0
+            blocked = hit_min or hit_max
 
-            if self.running and not out_of_bounds:
+
+            if self.running and not blocked:
                 self.stepper.step(direction=self.direction, steps=1, delay=self.delay)
                 self.cur_step += self.direction
             else:
@@ -52,7 +55,6 @@ def push_latest(cmd_q: queue.Queue, cmd):
     try:
         while True:
             cmd_q.get_nowait()
-            cmd_q.task_done()
     except queue.Empty:
         pass
     try:
