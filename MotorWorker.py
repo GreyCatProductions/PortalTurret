@@ -44,7 +44,7 @@ class StepperWorker(threading.Thread):
 
             if self.running and not out_of_bounds:
                 self.stepper.step(direction=self.direction, steps=1, delay=self.delay)
-                cur_step += self.direction
+                self.cur_step += self.direction
             else:
                 time.sleep(0.01)  
 
