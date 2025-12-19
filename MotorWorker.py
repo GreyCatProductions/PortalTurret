@@ -25,12 +25,12 @@ class StepperWorker(threading.Thread):
                 if not cmd:
                     continue
 
-                if cmd[0] == "run":
+                if cmd[0].lower() == "run":
                     _, direction = cmd
                     self.running = True
                     self.direction = 1 if direction >= 0 else -1
 
-                elif cmd[0] == "stop":
+                elif cmd[0].lower() == "stop":
                     self.running = False
 
             except queue.Empty:

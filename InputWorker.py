@@ -41,18 +41,18 @@ class InputWorker(threading.Thread):
 
             if s in ("manual",):
                 self.mode_ref["mode"] = "manual"
-                push_latest(self.cmd_q, ("STOP"))
+                push_latest(self.cmd_q, ("stop"))
                 print("Mode = manual (keyboard)")
                 continue
 
             parts = s.split()
-            cmd = parts[0]
+            cmd = parts[0].lower()
 
             if cmd in ("l", "left"):
                 push_latest(self.cmd_q, ("run", -1))
             elif cmd in ("r", "right"):
                 push_latest(self.cmd_q, ("run", 1))
-            elif cmd == "stop":
+            elif cmd in ("stop"):
                 push_latest(self.cmd_q, ("stop"))
             else:
                 print("Unknown command. Type 'help'.")
