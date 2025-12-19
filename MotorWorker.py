@@ -22,8 +22,6 @@ class StepperWorker(threading.Thread):
                 cmd = self.cmd_q.get_nowait()
                 self.cmd_q.task_done()
 
-                print(f"Received command: {cmd} {cmd[0]}")
-
                 if not cmd:
                     continue
 
@@ -31,8 +29,7 @@ class StepperWorker(threading.Thread):
                     _, direction = cmd
                     self.running = True
                     self.direction = 1 if direction >= 0 else -1
-
-                elif cmd[0].lower() == "stop":
+                elif cmd[0].lower() in ("stop", "s"):
                     self.running = False
 
             except queue.Empty:
