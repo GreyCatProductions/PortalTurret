@@ -26,7 +26,7 @@ class InputWorker(threading.Thread):
             if not s:
                 continue
 
-            if s in ("q", "quit", "exit", "stop"):
+            if s in ("q", "quit", "exit"):
                 self.stop_evt.set()
                 return
 
@@ -53,7 +53,7 @@ class InputWorker(threading.Thread):
             elif cmd in ("r", "right"):
                 push_latest(self.cmd_q, ("run", 1))
             elif cmd == "stop":
-                push_latest(self.cmd_q, ("stop",))
+                push_latest(self.cmd_q, ("stop"))
             else:
                 print("Unknown command. Type 'help'.")
 
