@@ -58,7 +58,7 @@ def main():
             frame = detector.read()
             boxes = detector.detect(frame)
 
-            if(mode_ref["mode"] == "auto" and len(boxes > 0)):
+            if(mode_ref["mode"] == "auto" and len(boxes) > 0):
                 trackFace(frame = frame, boxes=boxes, cmd_q=cmd_q)
 
             if showCam:
@@ -72,6 +72,7 @@ def main():
     finally:
         stop_evt.set()
         detector.stop()
+        pan.release()
         #cv2.destroyAllWindows()
         # optional: wait a moment for motor thread to exit
         motor_thread.join(timeout=1.0)
