@@ -1,44 +1,9 @@
 import threading
 import queue
-import time
+from MotorWorker import StepperWorker, push_latest
 import cv2
 from PiCamFaceDetector import PiCamFaceDetector
 from ULN2003Stepper import ULN2003Stepper
-
-# ---------- Motor worker ----------
-class StepperWorker(threading.Thread):
-    def __init__(self, stepper: ULN2003Stepper, cmd_q: queue.Queue, stop_evt: threading.Event):
-        super().__init__(daemon=True)
-        self.stepper = stepper
-        self.cmd_q = cmd_q
-        self.stop_evt = stop_evt
-
-    def run(self):
-        while not self.stop_evt.is_set():
-            try:
-                direction, steps, delay = self.cmd_q.get(timeout=0.05)
-            except queue.Empty:
-                continue
-
-            # Defensive: clamp values
-            if steps <= 0:
-                continue
-
-            # Execute blocking motor movement here
-            self.stepper.step(direction=direction, steps=steps, delay=delay)
-
-            self.cmd_q.task_done()
-
-# ---------- Helper: keep only latest command (avoid lag) ----------
-def push_latest(cmd_q: queue.Queue, cmd):
-    # Drop older commands so motor follows “now”, not “history”
-    try:
-        while True:
-            cmd_q.get_nowait()
-            cmd_q.task_done()
-    except queue.Empty:
-        pass
-    cmd_q.put(cmd)
 
 def main():
     pan = ULN2003Stepper([17, 18, 27, 22])
@@ -84,8 +49,6 @@ def main():
                 if abs(err_x) > DEADBAND:
                     steps = int(min(MAX_STEPS_PER_FRAME, max(1, abs(err_x) * GAIN)))
                     direction = 1 if err_x > 0 else -1
-
-                    # send command to motor thread (latest-wins)
                     push_latest(cmd_q, (direction, steps, STEP_DELAY))
 
             #cv2.imshow("Face detection (PiCam)", frame)

@@ -1,0 +1,87 @@
+# ---------- Input worker (terminal commands) ----------
+import queue
+import threading
+
+from MotorWorker import push_latest
+
+
+class InputWorker(threading.Thread):
+    """
+    Reads commands from stdin without blocking the vision loop.
+    Commands:
+      l / left     -> step left
+      r / right    -> step right
+      stop         -> stop motor (sends 0 steps)
+      auto         -> enable face tracking
+      manual       -> disable face tracking
+      q / quit     -> exit program
+      help         -> print help
+    """
+    def __init__(self, cmd_q: queue.Queue, stop_evt: threading.Event, mode_ref: dict):
+        super().__init__(daemon=True)
+        self.cmd_q = cmd_q
+        self.stop_evt = stop_evt
+        self.mode_ref = mode_ref 
+
+    def run(self):
+        print(
+            "\nCommands: l/r, stop, auto, manual, q\n"
+            "Tip: type 'help' anytime.\n"
+        )
+        while not self.stop_evt.is_set():
+            try:
+                s = input("> ").strip().lower()
+            except EOFError:
+                self.stop_evt.set()
+                return
+
+            if not s:
+                continue
+
+            if s in ("q", "quit", "exit"):
+                self.stop_evt.set()
+                return
+
+            if s in ("help", "?"):
+                print("Commands: l/r (or left/right), stop, auto, manual, q")
+                continue
+
+            if s in ("auto",):
+                self.mode_ref["mode"] = "auto"
+                print("Mode = auto (face tracking)")
+                continue
+
+            if s in ("manual",):
+                self.mode_ref["mode"] = "manual"
+                print("Mode = manual (keyboard)")
+                continue
+
+            parts = s.split()
+            cmd = parts[0]
+
+            steps = 10
+            delay = 0.0015
+
+            if len(parts) >= 2:
+                try:
+                    steps = int(parts[1])
+                except ValueError:
+                    print("Steps must be an integer, e.g. 'left 20'")
+                    continue
+
+            if len(parts) >= 3:
+                try:
+                    delay = float(parts[2])
+                except ValueError:
+                    print("Delay must be a number, e.g. 'left 20 0.002'")
+                    continue
+
+            if cmd in ("l", "left"):
+                push_latest(self.cmd_q, (-1, max(1, steps), delay))
+            elif cmd in ("r", "right"):
+                push_latest(self.cmd_q, (1, max(1, steps), delay))
+            elif cmd == "stop":
+                push_latest(self.cmd_q, (1, 0, delay))
+            else:
+                print("Unknown command. Type 'help'.")
+
