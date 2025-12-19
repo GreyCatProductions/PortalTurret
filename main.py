@@ -20,11 +20,10 @@ def trackFace(frame, detector, boxes, cmd_q):
     cv2.circle(frame, (cx_img, h // 2), 4, (0, 0, 255), -1)
 
     DEADBAND = 15
-    STEP_DELAY = 0.0015
-    
+
     if abs(err_x) > DEADBAND:
         direction = 1 if err_x > 0 else -1
-        push_latest(cmd_q, ("run", direction, STEP_DELAY))
+        push_latest(cmd_q, ("run", direction))
     else:
         push_latest(cmd_q, ("stop",))
 
