@@ -45,6 +45,11 @@ class InputWorker(threading.Thread):
                 print("Mode = manual (keyboard)")
                 continue
 
+            if self.mode_ref["mode"] != "manual":
+                print("Mode is not manual! Cant change directions manually before changing!")
+                continue
+
+
             parts = s.split()
             cmd = parts[0].lower()
 

@@ -22,6 +22,8 @@ class StepperWorker(threading.Thread):
                 cmd = self.cmd_q.get_nowait()
                 self.cmd_q.task_done()
 
+                print(f"Received command: {cmd} {cmd[0]}")
+
                 if not cmd:
                     continue
 
