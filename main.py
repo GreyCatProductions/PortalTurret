@@ -101,17 +101,23 @@ def main(showCam=False):
                 time.sleep(0.01)
 
     finally:
-        stop_evt.set()
+        mode_ref["mode"] = "manual"
+        push_latest(pan_cmd_q, ("stop",))
+        push_latest(tilt_cmd_q, ("stop",))
+
         detector.stop()
-        
+
         pan_thread.home()
         tilt_thread.home()
-        
-        time.sleep(2)
-        
+
+        pan_thread.join_home(timeout=5)
+        tilt_thread.join_home(timeout=5)
+
+        stop_evt.set()
+
         pan.release()
         tilt.release()
-        
+
         if showCam:
             cv2.destroyAllWindows()
 

@@ -21,33 +21,58 @@ class StepperWorker(threading.Thread):
 
         self.cur_step = 0
         
+        self.home_done = threading.Event()
         self.homing = False
+
+    def runHoming(self):
+        with self.lock:
+            target = self.home_target
+            cur = self.cur_step
+
+            if cur == target:
+                self.running = False
+                self.homing = False
+                self.home_done.set()
+
+            dir_to_home = 1 if target > cur else -1
+
+            hit_min = self.cur_step <= self.min and dir_to_home < 0
+            hit_max = self.cur_step >= self.max and dir_to_home > 0
+            if hit_min or hit_max:
+                self.homing = False
+                self.home_done.set()
+                return
+
+            self.stepper.step(direction=dir_to_home, steps=1, delay=self.delay)
+            with self.lock:
+                self.cur_step += dir_to_home
+
+    def readCommands(self):
+        try:
+            cmd = self.cmd_q.get_nowait()
+            self.cmd_q.task_done()
+
+            if not cmd:
+                return
+
+            if cmd[0].lower() == "run":
+                _, direction = cmd
+                self.running = True
+                self.direction = 1 if direction >= 0 else -1
+            elif cmd[0].lower() in ("stop","s"):
+                self.running = False
+
+        except queue.Empty:
+            pass
 
     def run(self):
         while not self.stop_evt.is_set():
             
             if self.homing:
-                dirToHome = 1 if self.direction > 0 else -1
-                self.stepper.step(direction=dirToHome, steps=1, delay=self.delay)
-                self.cur_step += dirToHome
+                self.runHoming()
                 continue
-                
-            try:
-                cmd = self.cmd_q.get_nowait()
-                self.cmd_q.task_done()
-
-                if not cmd:
-                    continue
-
-                if cmd[0].lower() == "run":
-                    _, direction = cmd
-                    self.running = True
-                    self.direction = 1 if direction >= 0 else -1
-                elif cmd[0].lower() in ("stop","s"):
-                    self.running = False
-
-            except queue.Empty:
-                pass
+            
+            self.readCommands()
 
             hit_min = self.cur_step <= self.min and self.direction < 0
             hit_max = self.cur_step >= self.max and self.direction > 0
@@ -61,7 +86,12 @@ class StepperWorker(threading.Thread):
                 time.sleep(0.01)  
 
     def home(self):
-        homing = True
+        self.running = False
+        self.home_done.clear()
+        self.homing = True
+        
+    def join_home(self, timeout=None) -> bool:
+        return self.home_done.wait(timeout)
         
         
 def push_latest(cmd_q: queue.Queue, cmd):
