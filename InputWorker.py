@@ -42,8 +42,8 @@ class InputWorker(threading.Thread):
 
             if s in ("manual",):
                 self.mode_ref["mode"] = "manual"
-                push_latest(self.pan_cmd_q, ("stop"))
-                push_latest(self.tilt_cmd_q, ("stop"))
+                push_latest(self.pan_cmd_q, ("stop",))
+                push_latest(self.tilt_cmd_q, ("stop",))
                 print("Mode = manual (keyboard)")
                 continue
 
@@ -66,8 +66,8 @@ class InputWorker(threading.Thread):
             elif cmd in ("d", "down"):
                 push_latest(self.tilt_cmd_q, (RUN, -1))
             elif cmd in ("stop"):
-                push_latest(self.pan_cmd_q, ("stop"))
-                push_latest(self.tilt_cmd_q, ("stop"))
+                push_latest(self.pan_cmd_q, ("stop",))
+                push_latest(self.tilt_cmd_q, ("stop",))
             else:
                 print("Unknown command. Type 'help'.")
 

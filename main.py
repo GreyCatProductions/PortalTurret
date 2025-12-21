@@ -32,7 +32,7 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
     err_x = cx_face - cx_img
     err_y = cy_face - cy_img
 
-    cv2.circle(frame, (cx_face, y + cy_face), 4, (0, 255, 0), -1)
+    cv2.circle(frame, (cx_face, cy_face), 4, (0, 255, 0), -1)
     cv2.circle(frame, (cx_img, cy_img), 4, (0, 0, 255), -1)
 
     DEADBAND = 30
@@ -71,7 +71,7 @@ def main(showCam=False):
     tilt_cmd_q = queue.Queue(maxsize=1) 
     pan_thread = StepperWorker(pan, pan_cmd_q, stop_evt, min=-300, max=300)
     pan_thread.start()
-    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, delay=0.01, min=300, max=300)
+    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, min=-300, max=300)
     tilt_thread.start()
 
     mode_ref = {"mode": "auto"}
@@ -83,6 +83,10 @@ def main(showCam=False):
     try:
         while not stop_evt.is_set():
             frame = detector.read()
+            if frame is None:
+                time.sleep(0.01)
+                continue
+
             boxes = detector.detect(frame)
 
             if(mode_ref["mode"] == "auto" and len(boxes) > 0):
@@ -94,7 +98,7 @@ def main(showCam=False):
                 if key in (27, ord("q")):
                     break
             else:
-                time.sleep(0.001)
+                time.sleep(0.01)
 
     finally:
         stop_evt.set()
