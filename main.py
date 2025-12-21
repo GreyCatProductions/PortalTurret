@@ -6,6 +6,19 @@ from MotorWorker import StepperWorker, push_latest
 import cv2
 from PiCamFaceDetector import PiCamFaceDetector
 from ULN2003Stepper import ULN2003Stepper
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-g",
+        "--gui",
+        action="store_true",
+        help="Show camera GUI"
+    )
+    return parser.parse_args()
+
 
 def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
     h, w = frame.shape[:2]
@@ -41,8 +54,7 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
 
 
 
-def main():
-    showCam = False
+def main(showCam=False):
     pan = ULN2003Stepper([17, 18, 27, 22])
     tilt = ULN2003Stepper([23, 24, 10, 9])
     detector = PiCamFaceDetector(
@@ -89,10 +101,13 @@ def main():
         detector.stop()
         pan.release()
         tilt.release()
-        #cv2.destroyAllWindows()
+        
+        if showCam:
+            cv2.destroyAllWindows()
 
         pan_thread.join(timeout=1.0)
         tilt_thread.join(timeout=1.0)
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(showCam=args.gui)

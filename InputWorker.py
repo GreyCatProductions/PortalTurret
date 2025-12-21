@@ -26,7 +26,7 @@ class InputWorker(threading.Thread):
 
             if not s:
                 continue
-
+            
             if s in ("q", "quit", "exit"):
                 self.stop_evt.set()
                 return
