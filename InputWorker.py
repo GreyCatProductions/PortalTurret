@@ -39,6 +39,21 @@ class InputWorker(threading.Thread):
                 self.mode_ref["mode"] = "auto"
                 print("Mode = auto (face tracking)")
                 continue
+            
+            if cmd in ("tilt_delay", "t_d"):
+                try:
+                    delay = int(parts[1])
+                    push_latest(self.tilt_cmd_q, ("delay", delay))
+                except:
+                    print("given delay is not a valid integer!")
+                continue
+            elif cmd in ("pan_delay", "p_d"):
+                try:
+                    delay = int(parts[1])
+                    push_latest(self.pan_cmd_q, ("delay", delay))
+                except:
+                    print("given delay is not a valid integer!")
+                continue
 
             if s in ("manual",):
                 self.mode_ref["mode"] = "manual"
@@ -70,18 +85,6 @@ class InputWorker(threading.Thread):
             elif cmd in ("stop"):
                 push_latest(self.pan_cmd_q, STOP)
                 push_latest(self.tilt_cmd_q, STOP)
-            elif cmd in ("tilt_delay", "t_d"):
-                try:
-                    delay = int(parts[1])
-                    push_latest(self.tilt_cmd_q, ("delay", delay))
-                except:
-                    print("given delay is not a valid integer!")
-            elif cmd in ("pan_delay", "p_d"):
-                try:
-                    delay = int(parts[1])
-                    push_latest(self.pan_cmd_q, ("delay", delay))
-                except:
-                    print("given delay is not a valid integer!")
             else:
                 print("Unknown command. Type 'help'.")
 
