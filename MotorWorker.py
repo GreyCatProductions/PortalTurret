@@ -62,6 +62,9 @@ class StepperWorker(threading.Thread):
                 self.direction = 1 if direction >= 0 else -1
             elif cmd[0].lower() in ("stop","s"):
                 self.running = False
+            elif cmd[0].lower() in ("delay"):
+                _, delay = cmd
+                self.delay = delay
 
         except queue.Empty:
             pass

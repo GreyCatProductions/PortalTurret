@@ -2,7 +2,7 @@ import cv2
 from picamera2 import Picamera2
 
 class PiCamFaceDetector:
-    def __init__(self, cascadePath="haarcascade_frontalface_default.xml", size=(320, 240), detectEvery=3, scaleFactor=1.1, minNeighbors=3, minSize=(30,30)):
+    def __init__(self, cascadePath="haarcascade_frontalface_default.xml", size=(320, 240), detectEvery=3, scaleFactor=1.1, minNeighbors=8, minSize=(50,50)):
         self.detect_every = int(max(detectEvery, 1))
         self.scaleFactor = float(scaleFactor)
         self.minNeighbors = int(minNeighbors)
@@ -42,6 +42,15 @@ class PiCamFaceDetector:
                 minSize=self.minSize,
             )
         return self.lastBoxes
+    
+    def setScaleFactor(self, factor):
+        self.scaleFactor = factor
+    
+    def setMinNeighbors(self, minNeighbors):
+        self.minNeighbors = minNeighbors
+        
+    def setMinSize(self, minSize):
+        self.minSize = minSize
     
     @staticmethod
     def draw_boxes(frame_bgr, boxes, color=(0, 0, 255), thickness=2):

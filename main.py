@@ -71,7 +71,7 @@ def main(showCam=False):
     tilt_cmd_q = queue.Queue(maxsize=1) 
     pan_thread = StepperWorker(pan, pan_cmd_q, stop_evt, min=-300, max=300)
     pan_thread.start()
-    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, min=-300, max=300)
+    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, delay=0.02, min=-300, max=300)
     tilt_thread.start()
 
     mode_ref = {"mode": "auto"}
@@ -93,7 +93,7 @@ def main(showCam=False):
                 trackFace(frame = frame, detector=detector ,boxes=boxes, pan_cmd_q=pan_cmd_q, tilt_cmd_q=tilt_cmd_q)
 
             if showCam:
-                cv2.imshow("Face detection (PiCam)", frame)
+                cv2.imshow("Face detection (Portal Turret)", frame)
                 key = cv2.waitKey(1) & 0xFF
                 if key in (27, ord("q")):
                     break

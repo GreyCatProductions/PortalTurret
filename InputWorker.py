@@ -55,19 +55,33 @@ class InputWorker(threading.Thread):
             parts = s.split()
             cmd = parts[0].lower()
 
-            RUN = "run"
+            RUN_RIGHT = ("RUN", 1)
+            RUN_LEFT = ("RUN", -1)
+            STOP = ("stop",)
 
             if cmd in ("l", "left"):
-                push_latest(self.pan_cmd_q, (RUN, -1))
+                push_latest(self.pan_cmd_q, RUN_LEFT)
             elif cmd in ("r", "right"):
-                push_latest(self.pan_cmd_q, (RUN, 1))
+                push_latest(self.pan_cmd_q, RUN_RIGHT)
             elif cmd in ("u", "up"):
-                push_latest(self.tilt_cmd_q, (RUN, 1))
+                push_latest(self.tilt_cmd_q, RUN_RIGHT)
             elif cmd in ("d", "down"):
-                push_latest(self.tilt_cmd_q, (RUN, -1))
+                push_latest(self.tilt_cmd_q, RUN_LEFT)
             elif cmd in ("stop"):
-                push_latest(self.pan_cmd_q, ("stop",))
-                push_latest(self.tilt_cmd_q, ("stop",))
+                push_latest(self.pan_cmd_q, STOP)
+                push_latest(self.tilt_cmd_q, STOP)
+            elif cmd in ("tilt_delay", "t_d"):
+                try:
+                    delay = int(parts[1])
+                    push_latest(self.tilt_cmd_q, ("delay", delay))
+                except:
+                    print("given delay is not a valid integer!")
+            elif cmd in ("pan_delay", "p_d"):
+                try:
+                    delay = int(parts[1])
+                    push_latest(self.pan_cmd_q, ("delay", delay))
+                except:
+                    print("given delay is not a valid integer!")
             else:
                 print("Unknown command. Type 'help'.")
 
