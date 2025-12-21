@@ -104,8 +104,8 @@ def main(showCam=False):
         stop_evt.set()
         detector.stop()
         
-        pan.home()
-        tilt.home()
+        pan_thread.home()
+        tilt_thread.home()
         
         time.sleep(2)
         
