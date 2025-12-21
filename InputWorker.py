@@ -20,6 +20,8 @@ class InputWorker(threading.Thread):
         while not self.stop_evt.is_set():
             try:
                 s = input("> ").strip().lower()
+                parts = s.split()
+                cmd = parts[0]
             except EOFError:
                 self.stop_evt.set()
                 return
@@ -42,7 +44,7 @@ class InputWorker(threading.Thread):
             
             if cmd in ("tilt_delay", "t_d", "td"):
                 try:
-                    delay = int(parts[1])
+                    delay = float(parts[1])
                     push_latest(self.tilt_cmd_q, ("delay", delay))
                 except:
                     print("given delay is not a valid integer!")
@@ -65,10 +67,6 @@ class InputWorker(threading.Thread):
             if self.mode_ref["mode"] != "manual":
                 print("Mode is not manual! Cant change directions manually before changing!")
                 continue
-
-
-            parts = s.split()
-            cmd = parts[0].lower()
 
             RUN_RIGHT = ("RUN", 1)
             RUN_LEFT = ("RUN", -1)
