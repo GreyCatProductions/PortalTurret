@@ -47,7 +47,7 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
         push_latest(pan_cmd_q, ("stop",))
 
     if yNeedsCorrection:
-        direction = -1 if err_y > 0 else 1
+        direction = 1 if err_y > 0 else -1
         push_latest(tilt_cmd_q, ("run", direction))
     else:
         push_latest(tilt_cmd_q, ("stop",))
