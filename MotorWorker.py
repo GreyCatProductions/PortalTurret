@@ -23,29 +23,32 @@ class StepperWorker(threading.Thread):
         
         self.home_done = threading.Event()
         self.homing = False
+        self.home_target = 0
+
 
     def runHoming(self):
-        with self.lock:
-            target = self.home_target
-            cur = self.cur_step
+        print("HOMING", self.cur_step, "->", self.home_target)
 
-            if cur == target:
-                self.running = False
-                self.homing = False
-                self.home_done.set()
+        target = self.home_target
+        cur = self.cur_step
 
-            dir_to_home = 1 if target > cur else -1
+        if cur == target:
+            self.running = False
+            self.homing = False
+            self.home_done.set()
+            return
 
-            hit_min = self.cur_step <= self.min and dir_to_home < 0
-            hit_max = self.cur_step >= self.max and dir_to_home > 0
-            if hit_min or hit_max:
-                self.homing = False
-                self.home_done.set()
-                return
+        dir_to_home = 1 if target > cur else -1
 
-            self.stepper.step(direction=dir_to_home, steps=1, delay=self.delay)
-            with self.lock:
-                self.cur_step += dir_to_home
+        hit_min = self.cur_step <= self.min and dir_to_home < 0
+        hit_max = self.cur_step >= self.max and dir_to_home > 0
+        if hit_min or hit_max:
+            self.homing = False
+            self.home_done.set()
+            return
+
+        self.stepper.step(direction=dir_to_home, steps=1, delay=self.delay)
+        self.cur_step += dir_to_home
 
     def readCommands(self):
         try:
