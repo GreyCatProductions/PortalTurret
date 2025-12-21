@@ -90,7 +90,7 @@ class StepperWorker(threading.Thread):
         self.home_done.clear()
         self.homing = True
         
-    def join_home(self, timeout=None) -> bool:
+    def joinHome(self, timeout=None) -> bool:
         return self.home_done.wait(timeout)
         
         

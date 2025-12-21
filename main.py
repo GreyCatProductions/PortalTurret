@@ -110,8 +110,8 @@ def main(showCam=False):
         pan_thread.home()
         tilt_thread.home()
 
-        pan_thread.join_home(timeout=5)
-        tilt_thread.join_home(timeout=5)
+        pan_thread.joinHome(timeout=5)
+        tilt_thread.joinHome(timeout=5)
 
         stop_evt.set()
 
