@@ -40,14 +40,14 @@ class InputWorker(threading.Thread):
                 print("Mode = auto (face tracking)")
                 continue
             
-            if cmd in ("tilt_delay", "t_d"):
+            if cmd in ("tilt_delay", "t_d", "td"):
                 try:
                     delay = int(parts[1])
                     push_latest(self.tilt_cmd_q, ("delay", delay))
                 except:
                     print("given delay is not a valid integer!")
                 continue
-            elif cmd in ("pan_delay", "p_d"):
+            elif cmd in ("pan_delay", "p_d", "pd"):
                 try:
                     delay = int(parts[1])
                     push_latest(self.pan_cmd_q, ("delay", delay))
