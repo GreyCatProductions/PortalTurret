@@ -27,8 +27,6 @@ class StepperWorker(threading.Thread):
 
 
     def runHoming(self):
-        print("HOMING", self.cur_step, "->", self.home_target)
-
         target = self.home_target
         cur = self.cur_step
 
