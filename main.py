@@ -103,6 +103,12 @@ def main(showCam=False):
     finally:
         stop_evt.set()
         detector.stop()
+        
+        pan.home()
+        tilt.home()
+        
+        time.sleep(2)
+        
         pan.release()
         tilt.release()
         

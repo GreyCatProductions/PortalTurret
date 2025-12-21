@@ -20,9 +20,18 @@ class StepperWorker(threading.Thread):
         self.max = max
 
         self.cur_step = 0
+        
+        self.homing = False
 
     def run(self):
         while not self.stop_evt.is_set():
+            
+            if self.homing:
+                dirToHome = 1 if self.direction > 0 else -1
+                self.stepper.step(direction=dirToHome, steps=1, delay=self.delay)
+                self.cur_step += dirToHome
+                continue
+                
             try:
                 cmd = self.cmd_q.get_nowait()
                 self.cmd_q.task_done()
@@ -51,6 +60,10 @@ class StepperWorker(threading.Thread):
             else:
                 time.sleep(0.01)  
 
+    def home(self):
+        homing = True
+        
+        
 def push_latest(cmd_q: queue.Queue, cmd):
     try:
         while True:
