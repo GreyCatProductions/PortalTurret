@@ -2,12 +2,15 @@ import threading
 import queue
 import time
 from InputWorker import InputWorker
+from MG99RServo import MG99RServo
 from MotorWorker import StepperWorker, push_latest
 import cv2
 from PiCamFaceDetector import PiCamFaceDetector
 from ULN2003Stepper import ULN2003Stepper
 import argparse
+import RPi.GPIO as GPIO
 
+tilt = MG99RServo(pin=4)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -39,7 +42,7 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
 
     xNeedsCorrection = abs(err_x) > DEADBAND
     yNeedsCorrection = abs(err_y) > DEADBAND
-
+    '''
     if xNeedsCorrection:
         direction = 1 if err_x > 0 else -1
         push_latest(pan_cmd_q, ("run", direction))
@@ -51,12 +54,17 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
         push_latest(tilt_cmd_q, ("run", direction))
     else:
         push_latest(tilt_cmd_q, ("stop",))
+    '''
+    
+    if yNeedsCorrection:
+        tilt.set_target(tilt.target + (10) )
+    else:
+        tilt.set_target(tilt.current)
 
 
 
 def main(showCam=False):
     pan = ULN2003Stepper([17, 18, 27, 22])
-    tilt = ULN2003Stepper([23, 24, 10, 9])
     detector = PiCamFaceDetector(
         cascadePath="haarcascade_frontalface_default.xml",
         size=(320, 240),
@@ -71,8 +79,6 @@ def main(showCam=False):
     tilt_cmd_q = queue.Queue(maxsize=1) 
     pan_thread = StepperWorker(pan, pan_cmd_q, stop_evt, min=-300, max=300)
     pan_thread.start()
-    tilt_thread = StepperWorker(tilt, tilt_cmd_q, stop_evt, delay=0.02, min=-300, max=300)
-    tilt_thread.start()
 
     mode_ref = {"mode": "auto"}
     input_thread = InputWorker(tilt_cmd_q,pan_cmd_q, stop_evt, mode_ref)
@@ -108,21 +114,20 @@ def main(showCam=False):
         detector.stop()
 
         pan_thread.home()
-        tilt_thread.home()
+        tilt.set_target(90.0)
 
         pan_thread.joinHome(timeout=5)
-        tilt_thread.joinHome(timeout=5)
 
         stop_evt.set()
 
         pan.release()
-        tilt.release()
+        tilt.close()
 
         if showCam:
             cv2.destroyAllWindows()
 
         pan_thread.join(timeout=1.0)
-        tilt_thread.join(timeout=1.0)
+        GPIO.cleanup()
 
 if __name__ == "__main__":
     args = parse_args()
