@@ -64,7 +64,7 @@ def trackFace(frame, detector, boxes, tilt, pan_cmd_q, tilt_cmd_q):
 def main(showCam=False):
     GPIO.setmode(GPIO.BCM)
     pan = ULN2003Stepper([17, 18, 27, 22])
-    tilt = MG99RServo(pin=4)
+    tilt = MG99RServo(pin=12)
     detector = PiCamFaceDetector(
         cascadePath="haarcascade_frontalface_default.xml",
         size=(320, 240),
