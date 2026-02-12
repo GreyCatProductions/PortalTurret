@@ -2,8 +2,6 @@ import time
 import threading
 import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BCM)
-
 class MG99RServo:
     def __init__(self, pin, freq_hz=50, min_us=500, max_us=2500,
                  start_angle=90, update_hz=50, max_deg_per_sec=240):
