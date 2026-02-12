@@ -1,43 +1,45 @@
-import RPi.GPIO as GPIO
 import time
+import pigpio
 
-SERVO_PIN = 12   
+SERVO_PIN = 12  # BCM
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-GPIO.setup(SERVO_PIN, GPIO.OUT)
+pi = pigpio.pi()
+if not pi.connected:
+    raise RuntimeError("pigpio daemon not running (pigpiod)")
 
-pwm = GPIO.PWM(SERVO_PIN, 50)  
-pwm.start(0)
+# Typical servo pulse range (you may need to calibrate)
+MIN_US = 500
+MAX_US = 2500
 
-def angle_to_duty(angle):
-    return 2.5 + (angle / 180.0) * 10.0 
+def angle_to_us(angle):
+    angle = max(0.0, min(180.0, angle))
+    return int(MIN_US + (angle / 180.0) * (MAX_US - MIN_US))
 
-STEP = 0.5    
-DELAY = 0.05    
+STEP_DEG = 1.0      # degrees per step (use 1–3 for smooth)
+DELAY = 0.05        # seconds per step (bigger = slower)
 
 try:
     while True:
-        # 0 -> 180
-        angle = 0.0
-        while angle <= 180.0:
-            pwm.ChangeDutyCycle(angle_to_duty(angle))
-            print(f"Angle: {angle:.1f}°")
+        a = 0.0
+        while a <= 180.0:
+            us = angle_to_us(a)
+            pi.set_servo_pulsewidth(SERVO_PIN, us)
+            print(f"Angle: {a:5.1f}°  pulse: {us}us")
             time.sleep(DELAY)
-            angle += STEP
+            a += STEP_DEG
 
-        time.sleep(1)
+        time.sleep(1.0)
 
-        # 180 -> 0
-        angle = 180.0
-        while angle >= 0.0:
-            pwm.ChangeDutyCycle(angle_to_duty(angle))
-            print(f"Angle: {angle:.1f}°")
+        a = 180.0
+        while a >= 0.0:
+            us = angle_to_us(a)
+            pi.set_servo_pulsewidth(SERVO_PIN, us)
+            print(f"Angle: {a:5.1f}°  pulse: {us}us")
             time.sleep(DELAY)
-            angle -= STEP
+            a -= STEP_DEG
 
-        time.sleep(1)
+        time.sleep(1.0)
 
 finally:
-    pwm.stop()
-    GPIO.cleanup()
+    pi.set_servo_pulsewidth(SERVO_PIN, 0)  # stop pulses
+    pi.stop()
