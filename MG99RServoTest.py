@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
-SERVO_PIN = 12
+SERVO_PIN = 4   
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -11,22 +11,32 @@ pwm = GPIO.PWM(SERVO_PIN, 50)
 pwm.start(0)
 
 def angle_to_duty(angle):
-    # Map 0–180° to duty cycle ~2.5–12.5
-    return 2.5 + (angle / 180.0) * 10.0
+    return 2.5 + (angle / 180.0) * 10.0 
+
+STEP = 0.5    
+DELAY = 0.05    
 
 try:
     while True:
-        for angle in range(0, 181, 1):
+        # 0 -> 180
+        angle = 0.0
+        while angle <= 180.0:
             pwm.ChangeDutyCycle(angle_to_duty(angle))
-            time.sleep(0.02) 
+            print(f"Angle: {angle:.1f}°")
+            time.sleep(DELAY)
+            angle += STEP
 
-        time.sleep(0.5)
+        time.sleep(1)
 
-        for angle in range(180, -1, -1):
+        # 180 -> 0
+        angle = 180.0
+        while angle >= 0.0:
             pwm.ChangeDutyCycle(angle_to_duty(angle))
-            time.sleep(0.02)
+            print(f"Angle: {angle:.1f}°")
+            time.sleep(DELAY)
+            angle -= STEP
 
-        time.sleep(0.5)
+        time.sleep(1)
 
 finally:
     pwm.stop()
