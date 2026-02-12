@@ -10,6 +10,7 @@ from ULN2003Stepper import ULN2003Stepper
 import argparse
 import RPi.GPIO as GPIO
 
+GPIO.setmode(GPIO.BCM)
 tilt = MG99RServo(pin=4)
 
 def parse_args():
