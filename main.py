@@ -10,8 +10,6 @@ from ULN2003Stepper import ULN2003Stepper
 import argparse
 import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BCM)
-tilt = MG99RServo(pin=4)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -24,7 +22,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
+def trackFace(frame, detector, boxes, tilt, pan_cmd_q, tilt_cmd_q):
     h, w = frame.shape[:2]
     cx_img = w // 2
     cy_img = h // 2
@@ -63,9 +61,10 @@ def trackFace(frame, detector, boxes, pan_cmd_q, tilt_cmd_q):
         tilt.set_target(tilt.current)
 
 
-
 def main(showCam=False):
+    GPIO.setmode(GPIO.BCM)
     pan = ULN2003Stepper([17, 18, 27, 22])
+    tilt = MG99RServo(pin=4)
     detector = PiCamFaceDetector(
         cascadePath="haarcascade_frontalface_default.xml",
         size=(320, 240),
@@ -97,7 +96,7 @@ def main(showCam=False):
             boxes = detector.detect(frame)
 
             if(mode_ref["mode"] == "auto" and len(boxes) > 0):
-                trackFace(frame = frame, detector=detector ,boxes=boxes, pan_cmd_q=pan_cmd_q, tilt_cmd_q=tilt_cmd_q)
+                trackFace(frame = frame, detector=detector ,boxes=boxes, pan_cmd_q=pan_cmd_q, tilt_cmd_q=tilt_cmd_q, tilt=tilt)
 
             if showCam:
                 cv2.imshow("Face detection (Portal Turret)", frame)
