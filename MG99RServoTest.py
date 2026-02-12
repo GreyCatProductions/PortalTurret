@@ -8,8 +8,8 @@ if not pi.connected:
     raise RuntimeError("pigpio daemon not running (pigpiod)")
 
 # Typical servo pulse range (you may need to calibrate)
-MIN_US = 500
-MAX_US = 2500
+MIN_US = 1000
+MAX_US = 2000
 
 def angle_to_us(angle):
     angle = max(0.0, min(180.0, angle))
