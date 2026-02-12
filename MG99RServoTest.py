@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
-SERVO_PIN = 4   
+SERVO_PIN = 12   
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
