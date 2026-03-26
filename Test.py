@@ -1,21 +1,30 @@
 import time
 import RPi.GPIO as GPIO
-from MG99RServo import MG99RServo
+
+PIN     = 18
+FREQ_HZ = 50
+MIN_US  = 500
+MAX_US  = 2500
+
+def angle_to_duty(angle):
+    pulse_us = MIN_US + (angle / 180.0) * (MAX_US - MIN_US)
+    return (pulse_us / (1_000_000.0 / FREQ_HZ)) * 100.0
 
 GPIO.setmode(GPIO.BCM)
-
-servo = MG99RServo(pin=18, start_angle=0, max_deg_per_sec=30)
-
-travel_time = 180 / 30 + 0.5  # degrees / deg_per_sec + small buffer
+GPIO.setup(PIN, GPIO.OUT)
+pwm = GPIO.PWM(PIN, FREQ_HZ)
+pwm.start(angle_to_duty(0))
 
 try:
     while True:
-        servo.set_target(180)
-        time.sleep(travel_time)
-        servo.set_target(0)
-        time.sleep(travel_time)
+        for angle in range(0, 181, 1):
+            pwm.ChangeDutyCycle(angle_to_duty(angle))
+            time.sleep(1 / 30)
+        for angle in range(180, -1, -1):
+            pwm.ChangeDutyCycle(angle_to_duty(angle))
+            time.sleep(1 / 30)
 except KeyboardInterrupt:
     pass
 
-servo.close()
+pwm.stop()
 GPIO.cleanup()
